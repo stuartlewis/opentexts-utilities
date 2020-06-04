@@ -1,6 +1,6 @@
-# OpenTexts web application
+# OpenTexts utilities
 
 ## https://opentexts.world/
 
-The web application powering the [OpenTexts.World](https://opentexts.world/) 
+Utilities relating to data manipulation for the [OpenTexts.World](https://opentexts.world/) 
 site.
