@@ -21,7 +21,7 @@ import world.opentexts.validate.Validator;
  * 
  * @author Stuart Lewis
  */
-public class NationalLibraryofScotland {
+public class NationalLibraryofScotlandCSV {
     
     public static void main(String[] args) {
         // Take the filename in and out as the only parameters
