@@ -105,12 +105,14 @@ public class NationalLibraryOfWalesMARCXML {
                     title = record.get("245");
                     title = title.replaceAll("\\$", "d0llar");
                     title = title.substring(7);
-                    if (title.contains("d0llarb")) {
-                        title = title.replace(":d0llarb", "");
-                    }
-                    if (title.contains("d0llarc")) {
-                        title = title.replace("/d0llarc", "");
-                    }
+                    title = title.replace("d0llara", " ");
+                    title = title.replace("d0llarb", " ");
+                    title = title.replace("d0llarc", " ");
+                    title = title.replace("d0llarn", " ");
+                    title = title.replace("d0llarf", " ");
+                    title = title.replace("d0llarh", " ");
+                    title = title.replace("d0llarl", " ");
+                    title = title.replace("d0llarp", " ");
                     
                     // $3(t.13(1865))$uhttp://purl.ox.ac.uk/uuid/7a8e629e39b5417aa410cb5687d9f69a$3(t.14(1865))$uhttp://purl.ox.ac.uk/uuid/1c6220f6e8254ced8f51ab2a2ae4fe28
                     // Select the last URL if there are multiple
@@ -140,6 +142,8 @@ public class NationalLibraryOfWalesMARCXML {
                         twoSixFour = twoSixFour.substring(0, twoSixFour.indexOf("d0llarc"));
                         publisher = publisher + twoSixFour.replaceAll("d0llarc", "").strip();   
                     }
+                    publisher = publisher.replaceAll("d0llara", "");
+                    publisher = publisher.replaceAll("d0llarb", "");
 
                     creator = record.get("100");
                     if (!"".equals(creator)) {
