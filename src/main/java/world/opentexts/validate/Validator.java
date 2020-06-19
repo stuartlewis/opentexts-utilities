@@ -78,6 +78,8 @@ public class Validator {
                                 break;
                         case 16: expected = "catLink";
                                 break;
+                        case 17: expected = "language";
+                                break;
                         default: expected = "$.$";
                                 System.err.println("  - ERROR: Incorrect headings - too many fields");
                                 System.err.println("  - There is likely data in this column, with no heading");
@@ -146,8 +148,11 @@ public class Validator {
                             break;
                         case 15: // idOther
                             break;
-                         case 16: // catLink
+                        case 16: // catLink
                             this.checkNonRepeatable(lineCounter, "catLink", value);
+                             break;
+                        case 17: // language
+                            this.checkNonRepeatable(lineCounter, "language", value);
                              break;
                         default: // Something has gone wrong
                             System.err.println(" - ERROR on line " + lineCounter);
