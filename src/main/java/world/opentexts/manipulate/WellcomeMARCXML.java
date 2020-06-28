@@ -8,15 +8,18 @@ package world.opentexts.manipulate;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import world.opentexts.util.DownloadIIIFManifest;
 import world.opentexts.util.MARC21LanguageCodeLookup;
 import world.opentexts.validate.Validator;
 
@@ -72,7 +75,7 @@ public class WellcomeMARCXML {
                    catLink = "", language = "";
  
             CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
-                    .withHeader("RecordID","DateAdded","DateChanged","Author","Title","CopyrightDate","Barcode","Classification","MainEntry","Custom1","Custom2","Custom3","Custom4","Custom5","ImportErrors","ValidationErrors","TagNumber","Ind1","Ind2","ControlData","Sort","LDR","001","003","005","006","008","091","007","010","016","028","033","034","035","015","017","020","024","029","037","039","040","041","080","092","111","090","100","025","038","043","055","070","245","250","042","045","047","048","049","050","051","052","060","066","099","110","210","240","242","260","072","082","086","093","095","130","246","300","243","255","264","490","590","856","504","581","800","084","336","502","518","535","550","630","700","247","256","310","337","539","541","591","655","730","263","338","362","501","505","534","545","610","650","740","772","506","520","536","540","585","588","751","759","773","961","530","562","611","321","340","500","516","522","525","533","753","009","011","583","600","652","690","710","938","059","651","752","770","515","538","776","810","830","880","900","935","546","561","711","775","956","212","508","510","720","902","959","960","774","777","787","947","765","907","079","648","945","653","940","096","580","780","785")
+                    .withHeader("907", "245", "856", "260", "264", "100", "610", "500", "008")
                     .withIgnoreHeaderCase()
                     .withTrim());
             
@@ -84,17 +87,16 @@ public class WellcomeMARCXML {
                 } else {
                     organisation = "Wellcome Collection";
 
-                    idLocal = record.get("907").substring(4, 12);
+                    idLocal = record.get("907").substring(6, 14);
                     System.out.println("Item: " + idLocal);
                     
-                    //"$aThe works of Mr. Thomas Brown, in prose and verse :$bserious, moral, and comical /$cTo which is prefix'd, A character of Mr. Tho. Brown and his writings, by James Drake"
                     title = record.get("245");
                     if ("".equals(title)) {
                         System.err.println("Skipping item: " + idLocal + " as it doesn't have a title"); 
                         continue;
                     }
                     title = title.replaceAll("\\$", "d0llar");
-                    title = title.substring(7);
+                    title = title.substring(9);
                     title = title.replace("d0llara", " ");
                     title = title.replace("d0llarb", " ");
                     title = title.replace("d0llarc", " ");
@@ -113,9 +115,12 @@ public class WellcomeMARCXML {
                     title = title.replace("d0llar7", " ");
                     title = title.replace("d0llar8", " ");
                     title = title.replace("d0llar9", " ");
+                    title = title.replace("/", "");
+                    title = title.replace("  ", " ");
                     if ((title.endsWith(" :")) || (title.endsWith(" /"))) {
                         title = title.substring(0, title.length() - 2).trim();
                     }
+                    //System.out.println("Title: " + title);
                     
                     // $3(t.13(1865))$uhttp://purl.ox.ac.uk/uuid/7a8e629e39b5417aa410cb5687d9f69a$3(t.14(1865))$uhttp://purl.ox.ac.uk/uuid/1c6220f6e8254ced8f51ab2a2ae4fe28
                     // Select the last URL if there are multiple
@@ -132,8 +137,17 @@ public class WellcomeMARCXML {
                     }
                     
                     // Select the first year if there are multiple
-                    year = record.get("CopyrightDate");
-
+                    year = record.get("008");
+                    if (("".equals(year)) || (year.length() < 12)) {
+                        year = "Unknown";
+                    } else {
+                        year = year.substring(7, 11);     
+                        if (year.contains("\\\\")) {
+                                year = "Unknown";
+                        }
+                    }
+                    //System.out.println(year);
+                    
                     // Publisher 260 $b
                     publisher = record.get("260");
                     if (!"".equals(publisher)) {
@@ -157,7 +171,10 @@ public class WellcomeMARCXML {
                         publisher = publisher + twoSixFour.replaceAll("d0llarc", "").strip();   
                     }
                     publisher = publisher.replace("d0llara", " ");
-                    publisher = publisher.replace("d0llarb", " ");
+                    publisher = publisher.replace("d0llarb", " ").trim();
+                    if (publisher.endsWith(",")) {
+                        publisher = publisher.substring(0, publisher.length() - 1);
+                    }
    
                     creator = record.get("100");
                     if (!"".equals(creator)) {
@@ -167,6 +184,9 @@ public class WellcomeMARCXML {
                         if (creator.contains("d0llar")) {
                             creator = creator.substring(0, creator.indexOf("d0llar")).strip();
                         }
+                    }
+                    if (creator.endsWith(",")) {
+                        creator = creator.substring(0, creator.length() - 1);
                     }
                     
                     topic = record.get("610");
@@ -178,18 +198,22 @@ public class WellcomeMARCXML {
                         }
                     }
 
-                    description = record.get("500");
-                    if (!"".equals(description)) {
-                        description = description.replaceAll("\\$a", "|").substring(1);
+                    String tempDescription = record.get("500");
+                    description = "";
+                    if (!"".equals(tempDescription)) {
+                        String[] descriptions = tempDescription.split("\\\\\\$a");
+                        for (String d : descriptions) {
+                            //System.out.println(d);
+                            description = description + d + "|";
+                        }
+                        description = description.replace("\\", "");
+                        description = description.substring(1, description.length() - 1);
                     }
 
-                    // Select the last URL if there are multiple
                     urlPDF = "https://dlcs.io/pdf/wellcome/pdf-item/b" + idLocal + "/0";
 
-                    // Select the last URL if there are multiple
                     urlOther = "https://wellcomelibrary.org/service/fulltext/b" + idLocal + "/0?raw=true";
 
-                    // Select the last URL if there are multiple
                     urlIIIF = "https://wellcomelibrary.org/iiif/b" + idLocal + "/manifest";
 
                     placeOfPublication = record.get("260");    
@@ -229,8 +253,24 @@ public class WellcomeMARCXML {
                     }
                     //System.out.println(language);
                     
-                    // Select the first licence if there are multiple
+                    // Download the manifest
                     licence = "";
+                    String prefix = "c:/otw/manifests/wellcome/";
+                    DownloadIIIFManifest.get(urlIIIF, prefix);
+                    try {
+			List<String> allLines = Files.readAllLines(Paths.get(prefix + urlIIIF.replaceAll("/", "_").replaceAll(":", "-")));
+			for (String line : allLines) {
+                            line = line.trim();
+                            if (line.startsWith("\"license\"")) {
+                                licence = line.split(" ")[1].trim();
+                                licence = licence.substring(1, licence.length() - 2);
+                                //System.out.println("Licence: " + licence);
+                                break;
+                            }
+			}
+                    } catch (IOException e) {
+                        //e.printStackTrace();
+                    }
 
                     idOther = "";
                     
