@@ -5,10 +5,12 @@
  */
 package world.opentexts.util;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.URL;
 
 /**
@@ -25,14 +27,20 @@ public class DownloadIIIFManifest {
         
         // If it isn't in the cache...
         if (!manifest.exists()) {
-            try (BufferedInputStream in = new BufferedInputStream(new URL(url).openStream());
-                FileOutputStream fileOutputStream = new FileOutputStream(prefix + filename)) {
-                byte dataBuffer[] = new byte[1024];
-                int bytesRead;
-                while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                    fileOutputStream.write(dataBuffer, 0, bytesRead);
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+                PrintWriter pw = new PrintWriter (new FileWriter(prefix + filename));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    pw.write(inputLine + "\n");
+                    
+                    if (inputLine.contains("\"sequences\": [")) {
+                        break;
+                    }
                 }
                 System.out.println("CACHE MISS: " + prefix + filename);
+                in.close();
+                pw.close();
             } catch (IOException e) {
                 System.err.println("Unable to download IIIF manifest: " + url);
                 e.printStackTrace();
