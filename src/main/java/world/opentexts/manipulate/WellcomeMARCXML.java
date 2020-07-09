@@ -88,7 +88,7 @@ public class WellcomeMARCXML {
                     organisation = "Wellcome Collection";
 
                     idLocal = record.get("907").substring(6, 14);
-                    System.out.println("Item: " + idLocal);
+                    //System.out.println("Item: " + idLocal);
                     
                     title = record.get("245");
                     if ("".equals(title)) {
@@ -139,13 +139,14 @@ public class WellcomeMARCXML {
                     // Select the first year if there are multiple
                     year = record.get("008");
                     if (("".equals(year)) || (year.length() < 12)) {
-                        year = "Unknown";
+                        year = "";
                     } else {
                         year = year.substring(7, 11);     
                         if (year.contains("\\\\")) {
-                                year = "Unknown";
+                                year = "";
                         }
                     }
+                    year = year.replaceAll("u", "0");
                     //System.out.println(year);
                     
                     // Publisher 260 $b
@@ -256,7 +257,7 @@ public class WellcomeMARCXML {
                     // Download the manifest
                     licence = "";
                     String prefix = "c:/otw/manifests/wellcome/";
-                    DownloadIIIFManifest.get(urlIIIF, prefix);
+                    DownloadIIIFManifest.get(urlIIIF, prefix, false);
                     try {
 			List<String> allLines = Files.readAllLines(Paths.get(prefix + urlIIIF.replaceAll("/", "_").replaceAll(":", "-")));
 			for (String line : allLines) {
@@ -284,6 +285,8 @@ public class WellcomeMARCXML {
                                                          urlPDF, urlOther, urlIIIF,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
+                    
+                    System.out.println(lineCounter++);
                 }
             }
             System.out.println("Writing file: " + outFilename);

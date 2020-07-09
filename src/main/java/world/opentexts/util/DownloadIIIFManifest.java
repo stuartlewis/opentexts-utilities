@@ -20,7 +20,7 @@ import java.net.URL;
  */
 public class DownloadIIIFManifest {
     
-    public static void get(String url, String prefix) {
+    public static void get(String url, String prefix, boolean complete) {
         String filename = url.replaceAll("/", "_").replaceAll(":", "-");
         //System.out.println(filename);
         File manifest = new File(prefix + filename);
@@ -34,7 +34,7 @@ public class DownloadIIIFManifest {
                 while ((inputLine = in.readLine()) != null) {
                     pw.write(inputLine + "\n");
                     
-                    if (inputLine.contains("\"sequences\": [")) {
+                    if ((!complete) && (inputLine.contains("\"sequences\": ["))) {
                         break;
                     }
                 }
