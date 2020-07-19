@@ -529,9 +529,42 @@ public class MARC21LanguageCodeLookup {
         else if (language.equals("zun")) return "Zuni";
         else if (language.equals("zxx")) return "No linguistic content";
         else if (language.equals("zza")) return "Zaza";
+        else if (language.equalsIgnoreCase("ENG")) return "English";
+        else if (language.equalsIgnoreCase("English")) return "English";
+        else if (language.equalsIgnoreCase("english-handwritten")) return "English";
+        else if (language.equalsIgnoreCase("en_US")) return "English";
+        else if (language.equalsIgnoreCase("French")) return "French";
+        else if (language.equalsIgnoreCase("Italian")) return "Italian";
+        else if (language.equalsIgnoreCase("German")) return "German";
+        else if (language.equalsIgnoreCase("Latin")) return "Latin";
+        else if (language.equalsIgnoreCase("Spanish")) return "Spanish";
+        else if (language.equalsIgnoreCase("Dutch")) return "Dutch";
+        else if (language.equalsIgnoreCase("Catalan")) return "Catalan";
+        else if (language.equalsIgnoreCase("Portuguese")) return "Portuguese";
+        else if (language.equalsIgnoreCase("Croatian")) return "Croatian";
+        else if (language.equalsIgnoreCase("Czech")) return "Czech";
+        else if (language.equalsIgnoreCase("Russian")) return "Russian";
+        else if (language.equalsIgnoreCase("Welsh")) return "Welsh";
+        else if (language.equalsIgnoreCase("Swedish")) return "Swedish";
+        else if (language.equalsIgnoreCase("Danish")) return "Danish";
+        else if (language.equalsIgnoreCase("Greek")) return "Greek";
+        else if (language.equalsIgnoreCase("Korean")) return "Korean";
+        else if (language.equalsIgnoreCase("Hungarian")) return "Hungarian";
+        else if (language.equalsIgnoreCase("Finnish")) return "Finnish";
+        else if (language.equalsIgnoreCase("Serbian")) return "Serbian";
+        else if (language.equalsIgnoreCase("Aramaic")) return "Aramaic";
+        else if (language.equalsIgnoreCase("Armenian")) return "Armenian";
+        else if (language.equalsIgnoreCase("Polish")) return "Polish";
+        else if (language.equalsIgnoreCase("Hebrew")) return "Hebrew";
+        else if (language.equalsIgnoreCase("Irish")) return "Irish";
+        else if (language.equalsIgnoreCase("Ukranian")) return "Ukranian";
+        else if (language.equalsIgnoreCase("Arabic")) return "Arabic";
+        else if (language.equalsIgnoreCase("Afrikaans")) return "Afrikaans";
+        else if (language.equalsIgnoreCase("Icelandic")) return "Icelandic";
+        else if (language.equalsIgnoreCase("Slovak")) return "Slovak";
         else {
             // Jsut stop for now
-            System.err.println(" - Unknown language: " + language);
+            //System.err.println(" - Unknown language: " + language);
             return "Undetermined";
         }
     }
