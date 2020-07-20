@@ -5,8 +5,10 @@
  */
 package world.opentexts.manipulate;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -38,7 +40,7 @@ public class InternetArchiveBooksCSV {
             // Open the input CSV
             String inFilename = args[0];
             System.out.println("Processing file: " + inFilename);
-            Reader in = new FileReader(inFilename);
+            Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(inFilename), "UTF-8"));
 
             // Open the output CSV
             String outFilename = args[1];
@@ -83,7 +85,7 @@ public class InternetArchiveBooksCSV {
                 } else {
                     lineCounter++;
                     if (lineCounter % 100 == 0) System.out.println("Line: " + lineCounter);
-                    if (lineCounter > 100000) break;
+                    //if (lineCounter > 100000) break;
                     
                     organisation = "Internet Archive Books";
 
