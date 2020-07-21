@@ -39,6 +39,7 @@ public class FindLongestTitle {
         });
         if (directoryListing != null) {
             for (File child : directoryListing) {
+                System.out.println("========\n" + child.getName() + "\n========");
                 Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(child), "UTF-8"));
                 CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
                     .withHeader("organisation",
