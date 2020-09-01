@@ -66,19 +66,23 @@ public class Validator {
                                 break;
                         case 10: expected = "urlPDF";
                                 break;
-                        case 11: expected = "urlOther";
+                        case 11: expected = "urlIIIF";
                                 break;
-                        case 12: expected = "urlIIIF";
+                        case 12: expected = "urlPlainText";
                                 break;
-                        case 13: expected = "placeOfPublication";
+                        case 13: expected = "urlALTOXML";
                                 break;
-                        case 14: expected = "licence";
+                        case 14: expected = "urlOther";
                                 break;
-                        case 15: expected = "idOther";
+                        case 15: expected = "placeOfPublication";
                                 break;
-                        case 16: expected = "catLink";
+                        case 16: expected = "licence";
                                 break;
-                        case 17: expected = "language";
+                        case 17: expected = "idOther";
+                                break;
+                        case 18: expected = "catLink";
+                                break;
+                        case 19: expected = "language";
                                 break;
                         default: expected = "$.$";
                                 System.err.println("  - ERROR: Incorrect headings - too many fields");
@@ -136,22 +140,28 @@ public class Validator {
                         case 10: // urlPDF
                             this.checkNonRepeatable(lineCounter, "urlPDF", value);
                             break;
-                        case 11: // urlOther
-                            break;
-                        case 12: // urlIIIF
+                        case 11: // urlIIIF
                             this.checkNonRepeatable(lineCounter, "urlIIIF", value);
                             break;
-                        case 13: // placeOfPublication
+                        case 12: // urlPlainText
+                            this.checkNonRepeatable(lineCounter, "urlPlainText", value);
                             break;
-                        case 14: // licence
+                        case 13: // urlALTOXML
+                            this.checkNonRepeatable(lineCounter, "urlALTOXML", value);
+                            break;
+                        case 14: // urlOther
+                            break;
+                        case 15: // placeOfPublication
+                            break;
+                        case 16: // licence
                             this.checkNonRepeatable(lineCounter, "licence", value);
                             break;
-                        case 15: // idOther
+                        case 17: // idOther
                             break;
-                        case 16: // catLink
+                        case 18: // catLink
                             this.checkNonRepeatable(lineCounter, "catLink", value);
                              break;
-                        case 17: // language
+                        case 19: // language
                             this.checkNonRepeatable(lineCounter, "language", value);
                              break;
                         default: // Something has gone wrong
