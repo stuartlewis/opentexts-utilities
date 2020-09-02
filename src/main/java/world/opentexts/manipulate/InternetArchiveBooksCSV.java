@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -24,13 +25,22 @@ import world.opentexts.validate.Validator;
  * A manipulation tool to convert Internet Archive Books CSV into the OpenTexts.World CSV format
  * 
  * @author Stuart Lewis
+ * 
+ * Command to grab the main results:
+ *  wget "https://archive.org/advancedsearch.php?q=collection%3A%28americana%29&fl%5B%5D=creator&fl%5B%5D=description&fl%5B%5D=external-identifier&fl%5B%5D=genre&fl%5B%5D=identifier&fl%5B%5D=language&fl%5B%5D=licenseurl&fl%5B%5D=publisher&fl%5B%5D=subject&fl%5B%5D=title&fl%5B%5D=year&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows=5000000&page=1&callback=callback&save=yes&output=csv"
+ * 
+ * Command to grab the exclude list:
+ *  wget "https://archive.org/advancedsearch.php?q=collection%3A%28inlibrary%29&fl%5B%5D=creator&fl%5B%5D=description&fl%5B%5D=external-identifier&fl%5B%5D=genre&fl%5B%5D=identifier&fl%5B%5D=language&fl%5B%5D=licenseurl&fl%5B%5D=publisher&fl%5B%5D=subject&fl%5B%5D=title&fl%5B%5D=year&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows=5000000&and%5B%5D%3Dlending___status%3A%22is_readable%22&page=1&callback=callback&save=yes&output=csv"
+ * 
+ * Parameters to run this script:
+ *  c:\otw\IA\ia-americana-filtered.csv c:\otw\IA\ia-americana-exclude.csv c:\otw\ia-clean-filtered.csv
  */
 public class InternetArchiveBooksCSV {
     
     public static void main(String[] args) {
         // Take the filename in and out as the only parameters
-        if (args.length < 2) {
-            System.err.println("Please supply input and output filenames");
+        if (args.length < 3) {
+            System.err.println("Please supply input, exclude, and output filenames");
             System.exit(0);
         }
 
@@ -38,12 +48,44 @@ public class InternetArchiveBooksCSV {
         
         try {
             // Open the input CSV
+            String inExFilename = args[1];
+            System.out.println("Processing file: " + inExFilename);
+            Reader inEx = new BufferedReader(new InputStreamReader(new FileInputStream(inExFilename), "UTF-8"));
+
+            CSVParser csvParserEx = new CSVParser(inEx, CSVFormat.DEFAULT
+                    .withHeader("creator","description","external-identifier","genre","identifier","language","licenseurl","publisher","subject","title","year")
+                    .withIgnoreHeaderCase()
+                    .withTrim());
+ 
+            // Setup some variables
+            boolean header = false;
+            int lineCounter = 1;
+            String id = "";
+            ArrayList<String> excludedID = new ArrayList<String>();
+            
+            // Process each line
+            for (CSVRecord record : csvParserEx) {
+                if (!header) {
+                    System.out.println(" - Processing header");
+                    header = true;
+                } else {
+                    lineCounter++;
+                    if (lineCounter % 10000 == 0) System.out.println("Line: " + lineCounter);
+                
+                    id = record.get("identifier");
+                    //if (debug) System.out.println(id);
+                    excludedID.add(id);
+                }
+            }
+            inEx.close();
+            
+            // Open the input CSV
             String inFilename = args[0];
             System.out.println("Processing file: " + inFilename);
             Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(inFilename), "UTF-8"));
 
             // Open the output CSV
-            String outFilename = args[1];
+            String outFilename = args[2];
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(outFilename));
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(
                                                     "organisation",
@@ -56,8 +98,10 @@ public class InternetArchiveBooksCSV {
                                                     "topic",
                                                     "description",
                                                     "urlPDF",
-                                                    "urlOther",
                                                     "urlIIIF",
+                                                    "urlPlainText",
+                                                    "urlALTOXML",
+                                                    "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
                                                     "idOther",
@@ -65,11 +109,12 @@ public class InternetArchiveBooksCSV {
                                                     "language"));
             
             // Setup some variables
-            boolean header = false;
-            int lineCounter = 1;
+            header = false;
+            lineCounter = 1;
             String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlOther = "", urlIIIF = "", placeOfPublication = "", licence = "", idOther = "",
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
+                   placeOfPublication = "", licence = "", idOther = "",
                    catLink = "", language = "";
             
             CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
@@ -84,13 +129,17 @@ public class InternetArchiveBooksCSV {
                     header = true;
                 } else {
                     lineCounter++;
-                    if (lineCounter % 100 == 0) System.out.println("Line: " + lineCounter);
+                    if (lineCounter % 10000 == 0) System.out.println("Line: " + lineCounter);
                     //if (lineCounter > 100000) break;
                     
                     organisation = "Internet Archive Books";
 
                     idLocal = record.get("identifier");
                     //if (debug) System.out.println(" - ID: " + idLocal);
+                    if (excludedID.contains(idLocal)) {
+                        if (debug) System.out.println("  - SKIPPING (excluded) " + idLocal);
+                        continue;
+                    }
                     
                     try {
                         year = record.get("year");
@@ -123,7 +172,7 @@ public class InternetArchiveBooksCSV {
 
                     urlPDF = "https://archive.org/download/" + idLocal + "/" + idLocal + ".pdf";
 
-                    urlOther = "https://archive.org/download/" + idLocal + "/" + idLocal + "_djvu.txt";
+                    urlPlainText = "https://archive.org/download/" + idLocal + "/" + idLocal + "_djvu.txt";
 
                     urlIIIF = "https://iiif.archivelab.org/iiif/" + idLocal + "/manifest.json";
 
@@ -140,7 +189,7 @@ public class InternetArchiveBooksCSV {
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
                                                          urlMain, year, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlOther, urlIIIF,
+                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                 }
