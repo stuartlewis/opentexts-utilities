@@ -31,7 +31,7 @@ public class NationalLibraryofScotlandIIIFDiscovery {
         boolean debug = false;
 
         // Open the output CSV
-        String outFilename = "c:\\otw\\nls-iiif-clean.csv";
+        String outFilename = "c:\\otw\\nls-iiif.csv";
         BufferedWriter writer = Files.newBufferedWriter(Paths.get(outFilename));
         CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(
                                                 "organisation",
@@ -39,13 +39,16 @@ public class NationalLibraryofScotlandIIIFDiscovery {
                                                 "title",
                                                 "urlMain",
                                                 "year",
+                                                "date",
                                                 "publisher",
                                                 "creator",
                                                 "topic",
                                                 "description",
                                                 "urlPDF",
-                                                "urlOther",
                                                 "urlIIIF",
+                                                "urlPlainText",
+                                                "urlALTOXML",
+                                                "urlOther",
                                                 "placeOfPublication",
                                                 "licence",
                                                 "idOther",
@@ -85,10 +88,10 @@ public class NationalLibraryofScotlandIIIFDiscovery {
                     JSONParser itemParser = new JSONParser();
                     JSONObject itemJson = (JSONObject)itemParser.parse(new FileReader(prefix + manifestURL.replaceAll("/", "_").replaceAll(":", "-")));
                                         
-                    String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
+                    String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                            publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                           urlOther = "", urlIIIF = "", placeOfPublication = "", licence = "", idOther = "",
-                           catLink = "", language = "";
+                           urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
+                           placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
 
                     organisation = "National Library of Scotland";
                     
@@ -103,6 +106,7 @@ public class NationalLibraryofScotlandIIIFDiscovery {
                     if (debug) System.out.println(" - urlMain = " + urlMain);
                     
                     urlIIIF = manifestURL;
+                    if (debug) System.out.println(" - urlIIIF = " + urlIIIF);
                     
                     licence = (String)itemJson.get("attribution");
                     if ((licence != null) && (licence.contains("http"))) {
@@ -124,8 +128,18 @@ public class NationalLibraryofScotlandIIIFDiscovery {
                         String value = (String)metadataElement.get("value");
                         
                         if (("Date printed".equals(label)) || ("Date published".equals(label))) {
-                            year = value;
-                            if (debug) System.out.println(" - year = " + value);
+                            date = value;
+                            if (debug) System.out.println(" - date = " + date);
+                            year = date;
+                            try {
+                                int y = Integer.parseInt(date);
+                                if ((y < 1000) || (y > 2025)){
+                                    year = "";
+                                } 
+                            } catch (NumberFormatException e) {
+                                year = "";
+                            }
+                            if (debug) System.out.println(" - year = " + year);
                         } else if ("Author".equals(label)) {
                             creator = value;
                             if (debug) System.out.println(" creator = " + creator);
@@ -157,9 +171,9 @@ public class NationalLibraryofScotlandIIIFDiscovery {
                     
                     // Write the item to the CSV file
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
-                                                         urlMain, year, publisher,
+                                                         urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlOther, urlIIIF,
+                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther, 
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                 }
