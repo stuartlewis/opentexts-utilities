@@ -50,13 +50,16 @@ public class NationalLibraryOfWalesMARCXML {
                                                     "title",
                                                     "urlMain",
                                                     "year",
+                                                    "date",
                                                     "publisher",
                                                     "creator",
                                                     "topic",
                                                     "description",
                                                     "urlPDF",
-                                                    "urlOther",
                                                     "urlIIIF",
+                                                    "urlPlainText",
+                                                    "urlALTOXML",
+                                                    "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
                                                     "idOther",
@@ -66,10 +69,10 @@ public class NationalLibraryOfWalesMARCXML {
             // Setup some variables
             boolean header = false;
             int lineCounter = 1;
-            String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
+            String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlOther = "", urlIIIF = "", placeOfPublication = "", licence = "", idOther = "",
-                   catLink = "", language = "";
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
+                   placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
             CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
                     .withHeader("RecordID", "DateAdded", "DateChanged", "Author", "Title", "CopyrightDate", 
@@ -127,6 +130,15 @@ public class NationalLibraryOfWalesMARCXML {
                     
                     // Select the first year if there are multiple
                     year = record.get("CopyrightDate");
+                    date = year;
+                    try {
+                        int y = Integer.parseInt(date);
+                        if ((y < 1000) || (y > 2025)){
+                            year = "";
+                        } 
+                    } catch (NumberFormatException e) {
+                        year = "";
+                    }
 
                     // Publisher 260 $b
                     publisher = record.get("260");
@@ -214,9 +226,9 @@ public class NationalLibraryOfWalesMARCXML {
 
                     //System.out.println(idLocal);
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
-                                                         urlMain, year, publisher,
+                                                         urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlOther, urlIIIF,
+                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                 }
