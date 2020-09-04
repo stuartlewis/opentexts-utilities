@@ -8,15 +8,18 @@ package world.opentexts.manipulate;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import world.opentexts.util.DownloadIIIFManifest;
 import world.opentexts.util.MARC21LanguageCodeLookup;
 import world.opentexts.validate.Validator;
 
@@ -25,7 +28,7 @@ import world.opentexts.validate.Validator;
  * 
  * @author Stuart Lewis
  */
-public class BodleianMARCXML {
+public class BodleianMARCXMLCSV {
 
     public static void main(String[] args) {
         // Take the filename in and out as the only parameters
@@ -70,26 +73,14 @@ public class BodleianMARCXML {
             boolean header = false;
             int lineCounter = 1;
             String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
-                   publisher = "", creator = "", topic = "", description = "", 
-                   urlPDF = "", urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "",
-                   placeOfPublication = "", licence = "", idOther = "",
-                   catLink = "", language = "";
+                   publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
+                   placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
-            CSVParser csvParser;
-            
-            if (args[0].endsWith("-se.csv")) {
-                csvParser = new CSVParser(in, CSVFormat.DEFAULT
-                        //.withHeader("RecordID", "DateAdded", "DateChanged", "Author", "Title", "CopyrightDate", "Barcode", "Classification", "MainEntry", "Custom1", "Custom2", "Custom3", "Custom4", "Custom5", "ImportErrors", "ValidationErrors", "TagNumber", "Ind1", "Ind2", "ControlData", "Sort", "LDR", "001", "003", "005", "006", "008", "007", "010", "016", "028", "033", "034", "035", "015", "017", "020", "024", "029", "037", "039", "040", "041", "080", "092", "111", "090", "100", "025", "038", "043", "055", "070", "245", "250", "042", "045", "047", "048", "049", "050", "051", "052", "060", "066", "099", "110", "210", "240", "242", "260", "072", "082", "086", "093", "095", "130", "246", "300", "243", "255", "264", "490", "590", "856", "504", "581", "800", "084", "336", "502", "518", "535", "550", "630", "700", "247", "256", "310", "337", "539", "541", "655", "730", "263", "338", "362", "501", "505", "534", "545", "610", "650", "740", "772", "506", "520", "536", "540", "585", "588", "751", "773", "961", "530", "562", "611", "321", "340", "500", "516", "522", "525", "533", "753", "009", "011", "583", "600", "652", "690", "710", "938", "059", "651", "752", "770", "515", "538", "776", "810", "830", "880", "900", "935", "546", "561", "711", "775", "956", "212", "508", "510", "720", "902", "959", "960", "774", "777", "787", "947", "765", "907", "079", "648", "945", "653", "940", "096", "580", "780", "785")
-                        .withHeader("RecordID", "DateAdded", "DateChanged", "Author", "Title", "CopyrightDate", "Barcode", "Classification", "MainEntry", "Custom1", "Custom2", "Custom3", "Custom4", "Custom5", "ImportErrors", "ValidationErrors", "TagNumber", "Ind1", "Ind2", "ControlData", "Sort", "LDR", "001", "003", "005", "006", "007", "008", "010", "015", "016", "018", "019", "024", "012", "017", "020", "028", "029", "035", "022", "025", "030", "066", "032", "038", "044", "240", "250", "059", "099", "256", "037", "047", "049", "080", "084", "086", "092", "111", "045", "048", "055", "089", "090", "093", "096", "247", "255", "264", "365", "538", "590", "041", "042", "060", "243", "490", "655", "043", "051", "070", "087", "100", "679", "800", "039", "069", "074", "336", "350", "505", "530", "690", "040", "072", "337", "340", "440", "506", "514", "130", "245", "338", "410", "501", "516", "563", "752", "772", "776", "830", "909", "961", "082", "246", "347", "503", "504", "561", "770", "110", "260", "321", "534", "581", "600", "852", "950", "050", "300", "509", "720", "853", "919", "990", "310", "547", "362", "730", "751", "760", "969", "500", "956", "810", "955", "515", "546", "991", "998", "212", "510", "960", "995", "996", "520", "588", "540", "939", "522", "533", "539", "611", "777", "787", "994", "210", "525", "550", "780", "890", "938", "222", "630", "935", "941", "580", "762", "555", "610", "740", "775", "011", "650", "936", "981", "651", "711", "929", "700", "710", "774", "583", "785", "886", "940", "856", "912", "978", "850", "999", "880")
-                        .withIgnoreHeaderCase()
-                        .withTrim());
-            } else {
-                csvParser = new CSVParser(in, CSVFormat.DEFAULT
-                        .withHeader("RecordID", "DateAdded", "DateChanged", "Author", "Title", "CopyrightDate", "Barcode", "Classification", "MainEntry", "Custom1", "Custom2", "Custom3", "Custom4", "Custom5", "ImportErrors", "ValidationErrors", "TagNumber", "Ind1", "Ind2", "ControlData", "Sort", "LDR", "001", "003", "005", "006", "008", "007", "010", "016", "028", "033", "034", "035", "015", "017", "020", "024", "029", "037", "039", "040", "041", "080", "092", "111", "090", "100", "025", "038", "043", "055", "070", "245", "250", "042", "045", "047", "048", "049", "050", "051", "052", "060", "066", "099", "110", "210", "240", "242", "260", "072", "082", "086", "093", "095", "130", "246", "300", "243", "255", "264", "490", "590", "856", "504", "581", "800", "084", "336", "502", "518", "535", "550", "630", "700", "247", "256", "310", "337", "539", "541", "655", "730", "263", "338", "362", "501", "505", "534", "545", "610", "650", "740", "772", "506", "520", "536", "540", "585", "588", "751", "773", "961", "530", "562", "611", "321", "340", "500", "516", "522", "525", "533", "753", "009", "011", "583", "600", "652", "690", "710", "938", "059", "651", "752", "770", "515", "538", "776", "810", "830", "880", "900", "935", "546", "561", "711", "775", "956", "212", "508", "510", "720", "902", "959", "960", "774", "777", "787", "947", "765", "907", "079", "648", "945", "653", "940", "096", "580", "780", "785")
-                        //.withHeader("RecordID", "DateAdded", "DateChanged", "Author", "Title", "CopyrightDate", "Barcode", "Classification", "MainEntry", "Custom1", "Custom2", "Custom3", "Custom4", "Custom5", "ImportErrors", "ValidationErrors", "TagNumber", "Ind1", "Ind2", "ControlData", "Sort", "LDR", "001", "003", "005", "006", "007", "008", "010", "015", "016", "018", "019", "024", "012", "017", "020", "028", "029", "035", "022", "025", "030", "066", "032", "038", "044", "240", "250", "059", "099", "256", "037", "047", "049", "080", "084", "086", "092", "111", "045", "048", "055", "089", "090", "093", "096", "247", "255", "264", "365", "538", "590", "041", "042", "060", "243", "490", "655", "043", "051", "070", "087", "100", "679", "800", "039", "069", "074", "336", "350", "505", "530", "690", "040", "072", "337", "340", "440", "506", "514", "130", "245", "338", "410", "501", "516", "563", "752", "772", "776", "830", "909", "961", "082", "246", "347", "503", "504", "561", "770", "110", "260", "321", "534", "581", "600", "852", "950", "050", "300", "509", "720", "853", "919", "990", "310", "547", "362", "730", "751", "760", "969", "500", "956", "810", "955", "515", "546", "991", "998", "212", "510", "960", "995", "996", "520", "588", "540", "939", "522", "533", "539", "611", "777", "787", "994", "210", "525", "550", "780", "890", "938", "222", "630", "935", "941", "580", "762", "555", "610", "740", "775", "011", "650", "936", "981", "651", "711", "929", "700", "710", "774", "583", "785", "886", "940", "856", "912", "978", "850", "999", "880")
-                        .withIgnoreHeaderCase()
-                        .withTrim());
-            }
+            CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
+                    .withHeader("907", "245", "856", "260", "264", "100", "610", "500", "008", "001")
+                    .withIgnoreHeaderCase()
+                    .withTrim());
             
             // Process each line
             for (CSVRecord record : csvParser) {
@@ -102,10 +93,9 @@ public class BodleianMARCXML {
                     idLocal = record.get("001");
                     //System.out.println("Item: " + idLocal);
                     
-                    //"$aThe works of Mr. Thomas Brown, in prose and verse :$bserious, moral, and comical /$cTo which is prefix'd, A character of Mr. Tho. Brown and his writings, by James Drake"
-                    title = record.get("245");
+                    title = record.get("245").substring(2);
                     //System.out.println("TITLE = " + title);
-                    if (idLocal.equals("012768846")) title = "O národních písních a pověstech plemen slovanských.";
+                    /**if (idLocal.equals("012768846")) title = "O národních písních a pověstech plemen slovanských.";
                     if (idLocal.equals("012943621")) title = "Poesias.";
                     if (idLocal.equals("013253779")) title = "Sochinenīi͡a."; 
                     if (idLocal.equals("013356385")) title = "Russkīe ugolovnye prot͡sessy.";
@@ -148,13 +138,13 @@ public class BodleianMARCXML {
                     if (idLocal.equals("017229434")) title = "Banjārah nāmah."; 
                     if (idLocal.equals("017230023")) title = "Farhang-i Dastūr al-ṣibyān."; 
                     if (idLocal.equals("017253838")) title = "Manhaj al-najāh."; 
-                    if (idLocal.equals("017253842")) title = "Marj al-Baḥrain fī faz̤āʼil al-Ḥaramain."; 
+                    if (idLocal.equals("017253842")) title = "Marj al-Baḥrain fī faz̤āʼil al-Ḥaramain."; */
                     if ("".equals(title)) {
                         System.err.println("Skipping item: " + idLocal + " as it doesn't have a title"); 
                         continue;
                     }
                     title = title.replaceAll("\\$", "d0llar");
-                    title = title.substring(7);
+                    //title = title.substring(7);
                     title = title.replace("d0llara", " ");
                     title = title.replace("d0llarb", " ");
                     title = title.replace("d0llarc", " ");
@@ -174,11 +164,11 @@ public class BodleianMARCXML {
                     title = title.replace("d0llar8", " ");
                     title = title.replace("d0llar9", " ");
                     if ((title.endsWith(" :")) || (title.endsWith(" /"))) {
-                        title = title.substring(0, title.length() - 2).trim();
+                        title = title.substring(0, title.length() - 2);
                     }
+                    title = title.trim();
+                    //System.out.println("Title: " + title);
                     
-                    // $3(t.13(1865))$uhttp://purl.ox.ac.uk/uuid/7a8e629e39b5417aa410cb5687d9f69a$3(t.14(1865))$uhttp://purl.ox.ac.uk/uuid/1c6220f6e8254ced8f51ab2a2ae4fe28
-                    // Select the last URL if there are multiple
                     urlMain = record.get("856");
                     urlMain = urlMain.replaceAll("\\$", "d0llar");
                     //System.out.println("URL = " + urlMain);
@@ -190,9 +180,23 @@ public class BodleianMARCXML {
                     if (urlMain.contains("d0llar")) {
                         urlMain = urlMain.substring(0, urlMain.indexOf("d0llar"));
                     }
+                    if (urlMain.contains(";")) { urlMain = urlMain.substring(0, urlMain.indexOf(";")); }
                     
                     // Select the first year if there are multiple
-                    year = record.get("CopyrightDate").trim();
+                    year = record.get("008");
+                    if (("".equals(year)) || (year.length() < 12)) {
+                        year = "";
+                    } else {
+                        year = year.substring(7, 11);     
+                        if (year.contains("\\\\")) {
+                                year = "";
+                        }
+                    }
+                    date = year;
+                    date = date.replaceAll("[|]", "0");
+                    if (year.contains("uuu")) { year = ""; }
+                    year = year.replaceAll("u", "0");
+                    year = year.replaceAll("[|]", "0");
                     try {
                         int y = Integer.parseInt(year);
                         if ((y < 1000) || (y > 2025)){
@@ -201,10 +205,8 @@ public class BodleianMARCXML {
                     } catch (NumberFormatException e) {
                         year = "";
                     }
-                    //System.out.println(" - Year: " + record.get("CopyrightDate") + " / " + year);
-                    
-                    date = record.get("CopyrightDate").trim();
-                    
+                    //System.out.println(" - Year: " + date + " / " + year);
+                                                           
                     // Publisher 260 $b
                     publisher = record.get("260");
                     if (!"".equals(publisher)) {
@@ -228,7 +230,10 @@ public class BodleianMARCXML {
                         publisher = publisher + twoSixFour.replaceAll("d0llarc", "").strip();   
                     }
                     publisher = publisher.replace("d0llara", " ");
-                    publisher = publisher.replace("d0llarb", " ");
+                    publisher = publisher.replace("d0llarb", " ").trim();
+                    if (publisher.endsWith(",")) {
+                        publisher = publisher.substring(0, publisher.length() - 1);
+                    }
    
                     creator = record.get("100");
                     if (!"".equals(creator)) {
@@ -238,6 +243,9 @@ public class BodleianMARCXML {
                         if (creator.contains("d0llar")) {
                             creator = creator.substring(0, creator.indexOf("d0llar")).strip();
                         }
+                    }
+                    if (creator.endsWith(",")) {
+                        creator = creator.substring(0, creator.length() - 1);
                     }
                     
                     topic = record.get("610");
@@ -249,9 +257,16 @@ public class BodleianMARCXML {
                         }
                     }
 
-                    description = record.get("500");
-                    if (!"".equals(description)) {
-                        description = description.replaceAll("\\$a", "|").substring(1);
+                    String tempDescription = record.get("500");
+                    description = "";
+                    if (!"".equals(tempDescription)) {
+                        String[] descriptions = tempDescription.split("\\\\\\$a");
+                        for (String d : descriptions) {
+                            //System.out.println(d);
+                            description = description + d + "|";
+                        }
+                        description = description.replace("\\", "");
+                        description = description.substring(1, description.length() - 1);
                     }
 
                     // Select the last URL if there are multiple
@@ -306,14 +321,13 @@ public class BodleianMARCXML {
                     }
                     //System.out.println(language);
                     
-                    // Select the first licence if there are multiple
                     licence = "";
 
                     idOther = "";
                     
                     // Generate the catalogue link
                     catLink = "http://solo.bodleian.ox.ac.uk/permalink/f/89vilt/oxfaleph" + idLocal ;
-
+                    
                     //System.out.println(idLocal);
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
                                                          urlMain, year, date, publisher,
@@ -321,6 +335,8 @@ public class BodleianMARCXML {
                                                          urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
+                    
+                    System.out.println(lineCounter++);
                 }
             }
             System.out.println("Writing file: " + outFilename);
