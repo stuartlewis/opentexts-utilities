@@ -56,33 +56,35 @@ public class Validator {
                                 break;
                         case 5: expected = "year";
                                 break;
-                        case 6: expected = "publisher";
+                        case 6: expected = "date";
                                 break;
-                        case 7: expected = "creator";
+                        case 7: expected = "publisher";
                                 break;
-                        case 8: expected = "topic";
+                        case 8: expected = "creator";
                                 break;
-                        case 9: expected = "description";
+                        case 9: expected = "topic";
                                 break;
-                        case 10: expected = "urlPDF";
+                        case 10: expected = "description";
                                 break;
-                        case 11: expected = "urlIIIF";
+                        case 11: expected = "urlPDF";
                                 break;
-                        case 12: expected = "urlPlainText";
+                        case 12: expected = "urlIIIF";
                                 break;
-                        case 13: expected = "urlALTOXML";
+                        case 13: expected = "urlPlainText";
                                 break;
-                        case 14: expected = "urlOther";
+                        case 14: expected = "urlALTOXML";
                                 break;
-                        case 15: expected = "placeOfPublication";
+                        case 15: expected = "urlOther";
                                 break;
-                        case 16: expected = "licence";
+                        case 16: expected = "placeOfPublication";
                                 break;
-                        case 17: expected = "idOther";
+                        case 17: expected = "licence";
                                 break;
-                        case 18: expected = "catLink";
+                        case 18: expected = "idOther";
                                 break;
-                        case 19: expected = "language";
+                        case 19: expected = "catLink";
+                                break;
+                        case 20: expected = "language";
                                 break;
                         default: expected = "$.$";
                                 System.err.println("  - ERROR: Incorrect headings - too many fields");
@@ -128,40 +130,44 @@ public class Validator {
                             break;
                         case 5: // year
                             this.checkNonRepeatable(lineCounter, "year", value);
+                            this.checkYear(lineCounter, "year", value);
                             break;
-                        case 6: // publisher
+                        case 6: // date
+                            this.checkNonRepeatable(lineCounter, "date", value);
                             break;
-                        case 7: // creator
+                        case 7: // publisher
                             break;
-                        case 8: // topic
+                        case 8: // creator
                             break;
-                        case 9: // description
+                        case 9: // topic
                             break;
-                        case 10: // urlPDF
+                        case 10: // description
+                            break;
+                        case 11: // urlPDF
                             this.checkNonRepeatable(lineCounter, "urlPDF", value);
                             break;
-                        case 11: // urlIIIF
+                        case 12: // urlIIIF
                             this.checkNonRepeatable(lineCounter, "urlIIIF", value);
                             break;
-                        case 12: // urlPlainText
+                        case 13: // urlPlainText
                             this.checkNonRepeatable(lineCounter, "urlPlainText", value);
                             break;
-                        case 13: // urlALTOXML
+                        case 14: // urlALTOXML
                             this.checkNonRepeatable(lineCounter, "urlALTOXML", value);
                             break;
-                        case 14: // urlOther
+                        case 15: // urlOther
                             break;
-                        case 15: // placeOfPublication
+                        case 16: // placeOfPublication
                             break;
-                        case 16: // licence
+                        case 17: // licence
                             this.checkNonRepeatable(lineCounter, "licence", value);
                             break;
-                        case 17: // idOther
+                        case 18: // idOther
                             break;
-                        case 18: // catLink
+                        case 19: // catLink
                             this.checkNonRepeatable(lineCounter, "catLink", value);
                              break;
-                        case 19: // language
+                        case 20: // language
                             this.checkNonRepeatable(lineCounter, "language", value);
                              break;
                         default: // Something has gone wrong
@@ -192,6 +198,30 @@ public class Validator {
             System.err.println(" - ERROR on line " + lineCounter);
             System.err.println("  - " + field + " is not a repeatable field:");
             System.err.println("  - " + value);
+            System.exit(0);
+        }
+    }
+    
+    private void checkYear(int lineCounter, String field, String value) {
+        if (value.equals("")) return;
+        try {
+            int y = Integer.parseInt(value);
+            if (y < 1000) {
+                System.err.println(" - ERROR on line " + lineCounter);
+                System.err.println("  - " + field + " is < 1000:");
+                System.err.println("  - " + value);
+                System.exit(0);
+            }
+            if (y > 2025) {
+                System.err.println(" - ERROR on line " + lineCounter);
+                System.err.println("  - " + field + " is > 2025:");
+                System.err.println("  - " + value);
+                System.exit(0);
+            }    
+        } catch (NumberFormatException e) {
+            System.err.println(" - ERROR on line " + lineCounter);
+            System.err.println("  - " + field + " is not a number:");
+            System.err.println("  - '" + value + "'");
             System.exit(0);
         }
     }
