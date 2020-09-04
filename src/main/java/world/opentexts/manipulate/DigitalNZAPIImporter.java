@@ -50,13 +50,16 @@ public class DigitalNZAPIImporter {
                                                     "title",
                                                     "urlMain",
                                                     "year",
+                                                    "date",
                                                     "publisher",
                                                     "creator",
                                                     "topic",
                                                     "description",
                                                     "urlPDF",
-                                                    "urlOther",
                                                     "urlIIIF",
+                                                    "urlPlainText",
+                                                    "urlALTOXML",
+                                                    "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
                                                     "idOther",
@@ -66,10 +69,10 @@ public class DigitalNZAPIImporter {
             // Setup some variables
             boolean header = false;
             int lineCounter = 1;
-            String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
+            String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlOther = "", urlIIIF = "", placeOfPublication = "", licence = "", idOther = "",
-                   catLink = "", language = "";
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "",
+                   placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
             // Organisation
             organisation = "DigitalNZ";
@@ -97,6 +100,7 @@ public class DigitalNZAPIImporter {
                     
                     // Title
                     title = (String)result.get("title");
+                    title.replaceAll("[|]", "-");
                     if (debug) System.out.println(" - " + title);
                     
                     // URLMain
@@ -104,12 +108,20 @@ public class DigitalNZAPIImporter {
                     if (debug) System.out.println(" - " + urlMain);
                     
                     // Year
-                    year = "Unknown";
+                    date = "Unknown";
                     JSONArray dates = (JSONArray)result.get("date");
                     if (dates.size() > 0) {
-                        year = (String)dates.get(0);
-                        year = year.substring(0, 4);
+                        date = (String)dates.get(0);
+                        date = date.substring(0, 4);
                         if (debug) System.out.println(" - " + year);
+                    }
+                    try {
+                        int y = Integer.parseInt(date);
+                        if ((y < 1000) || (y > 2025)){
+                            year = "";
+                        } 
+                    } catch (NumberFormatException e) {
+                        year = "";
                     }
                     
                     // Publisher
@@ -174,9 +186,9 @@ public class DigitalNZAPIImporter {
                     
                     // Write the CSV entry
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
-                                                         urlMain, year, publisher,
+                                                         urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlOther, urlIIIF,
+                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                     if (debug) System.out.println();
