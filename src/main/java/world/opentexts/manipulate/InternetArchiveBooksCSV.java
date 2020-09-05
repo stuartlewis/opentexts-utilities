@@ -93,6 +93,7 @@ public class InternetArchiveBooksCSV {
                                                     "title",
                                                     "urlMain",
                                                     "year",
+                                                    "date",
                                                     "publisher",
                                                     "creator",
                                                     "topic",
@@ -111,7 +112,7 @@ public class InternetArchiveBooksCSV {
             // Setup some variables
             header = false;
             lineCounter = 1;
-            String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
+            String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
                    urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
                    placeOfPublication = "", licence = "", idOther = "",
@@ -147,6 +148,15 @@ public class InternetArchiveBooksCSV {
                         // Thrown if the line is too short - so just just skip this istem
                         if (debug) System.err.println("ERROR - " + idLocal + " is too short");
                         continue;
+                    }
+                    date = year;
+                    try {
+                        int y = Integer.parseInt(year);
+                        if ((y < 1000) || (y > 2025)){
+                            year = "";
+                        } 
+                    } catch (NumberFormatException e) {
+                        year = "";
                     }
                     
                     title = record.get("title");
@@ -187,7 +197,7 @@ public class InternetArchiveBooksCSV {
                     language = MARC21LanguageCodeLookup.convert(record.get("language"));
                     
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
-                                                         urlMain, year, publisher,
+                                                         urlMain, year, date, publisher,
                                                          creator, topic, description,
                                                          urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
