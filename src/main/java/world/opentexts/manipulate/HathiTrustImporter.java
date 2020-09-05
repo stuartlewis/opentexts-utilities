@@ -51,6 +51,7 @@ public class HathiTrustImporter {
                                                     "title",
                                                     "urlMain",
                                                     "year",
+                                                    "date",
                                                     "publisher",
                                                     "creator",
                                                     "topic",
@@ -69,7 +70,7 @@ public class HathiTrustImporter {
             // Setup some variables
             boolean header = false;
             int lineCounter = 1;
-            String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
+            String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
                    urlIIIF = "", urlPlainText, urlALTOXML, urlOther, placeOfPublication = "", 
                    licence = "", idOther = "", catLink = "", language = "";
@@ -113,14 +114,24 @@ public class HathiTrustImporter {
                     if (debug) System.out.println(" - ID: " + idLocal);
                     
                     try {
-                        year = record.get("rights_date_used");
+                        date = record.get("rights_date_used");
                     } catch (Exception e) {
                         // Thrown if the line is too short - so just just skip this istem
                         if (debug) System.err.println("ERROR - " + idLocal + " is too short");
                         continue;
                     }
-                    if ("9999".equals(year)) year = "Unknown";
-                    if (debug) System.out.println("  - Year: " + year); 
+                    if ("9999".equals(date)) date = "Unknown";
+                    if (debug) System.out.println("  - Date: " + date); 
+                    year = date;
+                    try {
+                        int y = Integer.parseInt(year);
+                        if ((y < 1000) || (y > 2025)){
+                            year = "";
+                        } 
+                    } catch (NumberFormatException e) {
+                        year = "";
+                    }
+                    if (debug) System.out.println("  - Year: " + year);
                     
                     title = record.get("title");
                     if (title.contains("|")) title = title.replace('|', 'i');
@@ -172,7 +183,7 @@ public class HathiTrustImporter {
                     if (debug) System.out.println("  - Language: " + language);
 
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
-                                                         urlMain, year, publisher,
+                                                         urlMain, year, date, publisher,
                                                          creator, topic, description,
                                                          urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
