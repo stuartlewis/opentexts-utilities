@@ -12,8 +12,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -44,7 +44,7 @@ public class InternetArchiveBooksCSV {
             System.exit(0);
         }
 
-        boolean debug = true;
+        boolean debug = false;
         
         try {
             // Open the input CSV
@@ -61,7 +61,7 @@ public class InternetArchiveBooksCSV {
             boolean header = false;
             int lineCounter = 1;
             String id = "";
-            ArrayList<String> excludedID = new ArrayList<String>();
+            HashSet<String> excludedID = new HashSet<String>();
             
             // Process each line
             for (CSVRecord record : csvParserEx) {
