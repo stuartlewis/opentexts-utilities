@@ -21,7 +21,7 @@ import world.opentexts.util.MARC21LanguageCodeLookup;
 import world.opentexts.validate.Validator;
 
 /**
- * A manipulation tool to convert QUeen's University Belfast data feeds into the OpenTexts.World CSV format
+ * A manipulation tool to convert Queen's University Belfast data feeds into the OpenTexts.World CSV format
  * 
  * @author Stuart Lewis
  */
@@ -32,7 +32,7 @@ public class QUBSCRepository {
         if (args.length < 2) {
             args = new String[2];
             args[0] = "c:\\otw\\qub\\qub.csv";
-            args[1] = "c:\\otw\\qub\\qub-clean.csv";
+            args[1] = "c:\\otw\\qub.csv";
         }
 
         try {
@@ -51,13 +51,16 @@ public class QUBSCRepository {
                                                     "title",
                                                     "urlMain",
                                                     "year",
+                                                    "date",
                                                     "publisher",
                                                     "creator",
                                                     "topic",
                                                     "description",
                                                     "urlPDF",
-                                                    "urlOther",
                                                     "urlIIIF",
+                                                    "urlPlainText",
+                                                    "urlALTOXML",
+                                                    "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
                                                     "idOther",
@@ -67,10 +70,10 @@ public class QUBSCRepository {
             // Setup some variables
             boolean header = false;
             int lineCounter = 1;
-            String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
+            String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlOther = "", urlIIIF = "", placeOfPublication = "", licence = "", idOther = "",
-                   catLink = "", language = "";
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "",
+                   placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
             CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
                     .withHeader("000", "100", "245", "260", "500", "546", "690", "691", "856")
@@ -149,11 +152,20 @@ public class QUBSCRepository {
                     System.out.println(" URL: " + urlMain);
                     
                     // Select the first year if there are multiple
-                    year = record.get("691");
-                    System.out.println(" Year: " + year);
-                    if (!"".equals(year)) {
-                        year = year.substring(year.length() - 4);
-                        System.out.println(" Year: " + year);
+                    date = record.get("691");
+                    System.out.println(" Date: " + date);
+                    if (!"".equals(date)) {
+                        date = date.substring(date.length() - 4);
+                        System.out.println(" Date: " + date);
+                    }
+                    year = date;
+                    try {
+                        int y = Integer.parseInt(year);
+                        if ((y < 1000) || (y > 2025)){
+                            year = "";
+                        } 
+                    } catch (NumberFormatException e) {
+                        year = "";
                     }
                 
                     // Publisher 260 $b
@@ -197,10 +209,10 @@ public class QUBSCRepository {
                     catLink = "";
                     
                     //System.out.println(idLocal);
-                    csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
-                                                         urlMain, year, publisher,
+                    csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title, 
+                                                         urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlOther, urlIIIF,
+                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther, 
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                 }
