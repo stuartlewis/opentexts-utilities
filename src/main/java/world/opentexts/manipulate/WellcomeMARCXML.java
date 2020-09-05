@@ -7,7 +7,9 @@ package world.opentexts.manipulate;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -30,7 +32,7 @@ import world.opentexts.validate.Validator;
  */
 public class WellcomeMARCXML {
 
-    public static void main(String[] args) {
+    public static void run(String[] args) {
         // Take the filename in and out as the only parameters
         if (args.length < 2) {
             System.err.println("Please supply input and output filenames");
@@ -53,13 +55,16 @@ public class WellcomeMARCXML {
                                                     "title",
                                                     "urlMain",
                                                     "year",
+                                                    "date",
                                                     "publisher",
                                                     "creator",
                                                     "topic",
                                                     "description",
                                                     "urlPDF",
-                                                    "urlOther",
                                                     "urlIIIF",
+                                                    "urlPlainText",
+                                                    "urlALTOXML",
+                                                    "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
                                                     "idOther",
@@ -69,10 +74,10 @@ public class WellcomeMARCXML {
             // Setup some variables
             boolean header = false;
             int lineCounter = 1;
-            String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
+            String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlOther = "", urlIIIF = "", placeOfPublication = "", licence = "", idOther = "",
-                   catLink = "", language = "";
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
+                   placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
             CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
                     .withHeader("907", "245", "856", "260", "264", "100", "610", "500", "008")
@@ -137,16 +142,25 @@ public class WellcomeMARCXML {
                     }
                     
                     // Select the first year if there are multiple
-                    year = record.get("008");
-                    if (("".equals(year)) || (year.length() < 12)) {
-                        year = "";
+                    date = record.get("008");
+                    if (("".equals(date)) || (date.length() < 12)) {
+                        date = "";
                     } else {
-                        year = year.substring(7, 11);     
-                        if (year.contains("\\\\")) {
-                                year = "";
+                        date = date.substring(7, 11);     
+                        if (date.contains("\\\\")) {
+                                date = "";
                         }
                     }
+                    year = date;
                     year = year.replaceAll("u", "0");
+                    try {
+                        int y = Integer.parseInt(year);
+                        if ((y < 1000) || (y > 2025)){
+                            year = "";
+                        } 
+                    } catch (NumberFormatException e) {
+                        year = "";
+                    }
                     //System.out.println(year);
                     
                     // Publisher 260 $b
@@ -213,7 +227,7 @@ public class WellcomeMARCXML {
 
                     urlPDF = "https://dlcs.io/pdf/wellcome/pdf-item/b" + idLocal + "/0";
 
-                    urlOther = "https://wellcomelibrary.org/service/fulltext/b" + idLocal + "/0?raw=true";
+                    urlPlainText = "https://wellcomelibrary.org/service/fulltext/b" + idLocal + "/0?raw=true";
 
                     urlIIIF = "https://wellcomelibrary.org/iiif/b" + idLocal + "/manifest";
 
@@ -280,13 +294,13 @@ public class WellcomeMARCXML {
 
                     //System.out.println(idLocal);
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
-                                                         urlMain, year, publisher,
+                                                         urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlOther, urlIIIF,
+                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                     
-                    System.out.println(lineCounter++);
+                    //System.out.println(lineCounter++);
                 }
             }
             System.out.println("Writing file: " + outFilename);
@@ -298,6 +312,24 @@ public class WellcomeMARCXML {
         } catch (Exception e) {
             System.err.println("ERROR - " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+    
+    public static void main(String[] args) throws Exception {
+        File dir = new File("c:\\otw\\wellcome\\");
+        File [] files = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".csv");
+            }
+        });
+
+        for (File file : files) {
+            String[] params = new String[2];
+            params[0] = file.getCanonicalPath();
+            params[1] = "c:\\otw\\wt-" + file.getName();
+            System.out.println("Processing " + params[0] + " to " + params[1]);
+            WellcomeMARCXML.run(params);
         }
     }
 }
