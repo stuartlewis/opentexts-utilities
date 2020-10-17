@@ -33,22 +33,22 @@ import world.opentexts.validate.Validator;
  *  wget "https://archive.org/advancedsearch.php?q=collection%3A%28inlibrary%29&fl%5B%5D=creator&fl%5B%5D=description&fl%5B%5D=external-identifier&fl%5B%5D=genre&fl%5B%5D=identifier&fl%5B%5D=language&fl%5B%5D=licenseurl&fl%5B%5D=publisher&fl%5B%5D=subject&fl%5B%5D=title&fl%5B%5D=year&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows=5000000&and%5B%5D%3Dlending___status%3A%22is_readable%22&page=1&callback=callback&save=yes&output=csv"
  * 
  * Parameters to run this script:
- *  c:\otw\IA\ia-americana-filtered.csv c:\otw\IA\ia-americana-exclude.csv c:\otw\ia-clean-filtered.csv
+ *  c:\otw\IA\ia-americana.csv c:\otw\IA\ia-americana-exclude.csv c:\otw\ia-clean-filtered.csv
  */
 public class InternetArchiveBooksCSV {
     
     public static void main(String[] args) {
         // Take the filename in and out as the only parameters
-        if (args.length < 3) {
+        /**if (args.length < 3) {
             System.err.println("Please supply input, exclude, and output filenames");
             System.exit(0);
-        }
-
+        }*/
+        
         boolean debug = false;
         
         try {
             // Open the input CSV
-            String inExFilename = args[1];
+            String inExFilename = "c:\\otw\\IA\\ia-americana-exclude.csv";
             System.out.println("Processing file: " + inExFilename);
             Reader inEx = new BufferedReader(new InputStreamReader(new FileInputStream(inExFilename), "UTF-8"));
 
@@ -80,12 +80,12 @@ public class InternetArchiveBooksCSV {
             inEx.close();
             
             // Open the input CSV
-            String inFilename = args[0];
+            String inFilename = "c:\\otw\\IA\\ia-americana.csv";
             System.out.println("Processing file: " + inFilename);
             Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(inFilename), "UTF-8"));
 
             // Open the output CSV
-            String outFilename = args[2];
+            String outFilename = "c:\\otw\\IA\\ia-americana-filtered.csv";
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(outFilename));
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(
                                                     "organisation",
@@ -160,15 +160,27 @@ public class InternetArchiveBooksCSV {
                     }
                     
                     title = record.get("title");
+                    
+                    if (idLocal.equals("howwomansrightsb00nati")) {
+                        System.out.println(title);
+                    }
+                    
                     if (idLocal.equals("hitoryofmediaevalphil0000wulf")) {
                         title = "History of Mediaeval Philosophy";
                     } else if (title.equals("")) {
-                        System.err.println("ERROR: " + idLocal + " has no title");
+                        //System.err.println("ERROR: " + idLocal + " has no title");
                         continue;
                         //System.exit(0);
                     }
-                    title = title.replaceAll("\\\\|b", "");
+                    //title = title.replaceAll("\\\\|b", "");
                     title = title.replaceAll("\\|", "");
+                    title = title.replaceAll(",", "");
+                    //System.out.println(" - Title: " + title);
+                    
+                    if (idLocal.equals("howwomansrightsb00nati")) {
+                        System.out.println(title);
+                        
+                    }
                     
                     urlMain = "https://archive.org/details/" + idLocal;
                     
@@ -202,6 +214,8 @@ public class InternetArchiveBooksCSV {
                                                          urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
+                    
+                    
                 }
             }
             System.out.println("Writing file: " + outFilename);

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import world.opentexts.util.MARC21LanguageCodeLookup;
 import world.opentexts.validate.Validator;
 
 /**
@@ -26,8 +27,9 @@ public class NationalLibraryofScotlandCSV {
     public static void main(String[] args) {
         // Take the filename in and out as the only parameters
         if (args.length < 2) {
-            System.err.println("Please supply input and output filenames");
-            System.exit(0);
+            args = new String[2];
+            args[0] = "c:\\otw\\nls\\nlsmarc.csv";
+            args[1] = "c:\\otw\\nls-csv.csv";
         }
 
         try {
@@ -45,25 +47,29 @@ public class NationalLibraryofScotlandCSV {
                                                     "title",
                                                     "urlMain",
                                                     "year",
+                                                    "date",
                                                     "publisher",
                                                     "creator",
                                                     "topic",
                                                     "description",
                                                     "urlPDF",
-                                                    "urlOther",
                                                     "urlIIIF",
+                                                    "urlPlainText",
+                                                    "urlALTOXML",
+                                                    "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
                                                     "idOther",
-                                                    "catLink"));
+                                                    "catLink",
+                                                    "language"));
             
             // Setup some variables
             boolean header = false;
             int lineCounter = 1;
-            String organisation = "", idLocal = "", title = "", urlMain = "", year = "",
+            String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlOther = "", urlIIIF = "", placeOfPublication = "", licence = "", idOther = "",
-                   catLink = "";
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
+                   placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
             // Process each line
             for (CSVRecord record : CSVFormat.DEFAULT.parse(in)) {
@@ -90,10 +96,19 @@ public class NationalLibraryofScotlandCSV {
                     }
 
                     // Select the first year if there are multiple
-                    year = record.get(4);
-                    if (year.contains("|")) {
+                    date = record.get(4);
+                    if (date.contains("|")) {
                         String[] values = year.split("\\|");
-                        year = values[0].strip();
+                        date = values[0].strip();
+                    }
+                    year = date;
+                    try {
+                        int y = Integer.parseInt(year);
+                        if ((y < 1000) || (y > 2025)){
+                            year = "";
+                        } 
+                    } catch (NumberFormatException e) {
+                        year = "";
                     }
 
                     publisher = record.get(5);    
@@ -139,12 +154,22 @@ public class NationalLibraryofScotlandCSV {
                     // Generate the catalogue link
                     catLink = "https://search.nls.uk/primo-explore/search?vid=44NLS_VU1&query=any,contains," + idLocal;
                     
+                    language = record.get(27);
+                    if (("".equals(language)) || (language.length() < 38)) {
+                        language = "Not specified";
+                        //System.out.println(language);
+                    } else {
+                        language = MARC21LanguageCodeLookup.convert(language.substring(35, 38));     
+                    }
+                    System.out.println(language);
+                    
+                    // Write the CSV entry
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
-                                                         urlMain, year, publisher,
+                                                         urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlOther, urlIIIF,
+                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
                                                          placeOfPublication, licence, idOther,
-                                                         catLink));
+                                                         catLink, language));
                 }
             }
             System.out.println("Writing file: " + outFilename);
