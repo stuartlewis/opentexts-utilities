@@ -29,21 +29,21 @@ public class HathiTrustImporter {
     
     public static void main(String[] args) {
         // Take the filename in and out as the only parameters
-        if (args.length < 2) {
+        /**if (args.length < 2) {
             System.err.println("Please supply input and output filenames");
             System.exit(0);
-        }
-
+        }*/
+        
         boolean debug = false;
         
         try {
             // Open the input CSV
-            String inFilename = args[0];
+            String inFilename = "C://otw//HT//hathi_full_20210101.txt";
             System.out.println("Processing file: " + inFilename);
             Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(inFilename), "UTF-8"));
 
             // Open the output CSV
-            String outFilename = args[1];
+            String outFilename = "C://otw//HT//ht.csv";
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(outFilename));
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(
                                                     "organisation",
@@ -60,6 +60,7 @@ public class HathiTrustImporter {
                                                     "urlIIIF",
                                                     "urlPlainText",
                                                     "urlALTOXML",
+                                                    "urlTEI",
                                                     "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
@@ -72,7 +73,7 @@ public class HathiTrustImporter {
             int lineCounter = 1;
             String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlIIIF = "", urlPlainText, urlALTOXML, urlOther, placeOfPublication = "", 
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlTEI = "", urlOther = "", placeOfPublication = "", 
                    licence = "", idOther = "", catLink = "", language = "";
             
             CSVParser csvParser = new CSVParser(in, CSVFormat.newFormat('\t')
@@ -151,12 +152,20 @@ public class HathiTrustImporter {
                     description = record.get("description");
                     if (debug) System.out.println("  - Description: " + description);
 
+                    String accessProfile = record.get("access_profile_code");
                     urlPDF = "";
+                    urlPlainText = "";
+                    if (accessProfile.equals("open")) {
+                        urlPDF = "https://babel.hathitrust.org/cgi/imgsrv/download/pdf?id=" + idLocal;
+                        urlPlainText = "https://babel.hathitrust.org/cgi/imgsrv/download/plaintext?id=" + idLocal;
+                        if (debug) System.out.println("  - URL Plaintext: " + urlPlainText);
+                        if (debug) System.out.println("  - URL PDF: " + urlPDF);
+                    }
+                    
                     urlIIIF = "";
-                    urlPlainText = "https://babel.hathitrust.org/cgi/ssd?id=" + idLocal + ";seq=7";
-                    if (debug) System.out.println("  - URL Plain Text: " + urlPlainText);
+                    
                     urlALTOXML = "";
-                    urlOther = "";
+                    urlOther = "https://babel.hathitrust.org/cgi/ssd?id=" + idLocal;
 
                     placeOfPublication = record.get("pub_place");
                     if (debug) System.out.println("  - Place of Publication: " + placeOfPublication);
@@ -185,7 +194,8 @@ public class HathiTrustImporter {
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
                                                          urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
+                                                         urlPDF, urlIIIF, urlPlainText, 
+                                                         urlALTOXML, urlTEI, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                 }
