@@ -10,18 +10,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-import world.opentexts.util.DownloadIIIFManifest;
 import world.opentexts.util.MARC21LanguageCodeLookup;
 import world.opentexts.validate.Validator;
 
@@ -43,13 +40,13 @@ public class OpenBookPublishersMARCXML {
 
         try {
             // Open the input CSV
-            String inFilename = "c:\\otw\\OBP\\october2020.csv";
+            String inFilename = "c:\\otw\\OBP\\december2020.csv";
             System.out.println("Cleaning file: " + inFilename);
             //Reader in = new FileReader(inFilename, "UTF-8");
             Reader in = new BufferedReader(new InputStreamReader(new FileInputStream(inFilename), "UTF-8"));
 
             // Open the output CSV
-            String outFilename = "c:\\otw\\obp.csv";
+            String outFilename = "c:\\otw\\OBP\\obp-december2020.csv";
             BufferedWriter writer = Files.newBufferedWriter(Paths.get(outFilename));
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(
                                                     "organisation",
@@ -66,6 +63,7 @@ public class OpenBookPublishersMARCXML {
                                                     "urlIIIF",
                                                     "urlPlainText",
                                                     "urlALTOXML",
+                                                    "urlTEI",
                                                     "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
@@ -78,7 +76,7 @@ public class OpenBookPublishersMARCXML {
             int lineCounter = 1;
             String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlTEI = "", urlOther = "", 
                    placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
             CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
@@ -195,7 +193,8 @@ public class OpenBookPublishersMARCXML {
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
                                                          urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
+                                                         urlPDF, urlIIIF, urlPlainText, 
+                                                         urlALTOXML, urlTEI, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                     
@@ -215,7 +214,7 @@ public class OpenBookPublishersMARCXML {
     }
     
     public static void main(String[] args) throws Exception {
-        File dir = new File("c:\\otw\\wellcome\\");
+        File dir = new File("c:\\otw\\OBP\\");
         File [] files = dir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -226,7 +225,7 @@ public class OpenBookPublishersMARCXML {
         for (File file : files) {
             String[] params = new String[2];
             params[0] = file.getCanonicalPath();
-            params[1] = "c:\\otw\\wt-" + file.getName();
+            params[1] = "c:\\otw\\OBW\\obp-" + file.getName();
             System.out.println("Processing " + params[0] + " to " + params[1]);
             OpenBookPublishersMARCXML.run(params);
         }
