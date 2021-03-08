@@ -59,6 +59,7 @@ public class DigitalNZAPIImporter {
                                                     "urlIIIF",
                                                     "urlPlainText",
                                                     "urlALTOXML",
+                                                    "urlTEI",
                                                     "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
@@ -71,7 +72,7 @@ public class DigitalNZAPIImporter {
             int lineCounter = 1;
             String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "",
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlTEI = "", urlOther = "",
                    placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
             // Organisation
@@ -100,7 +101,8 @@ public class DigitalNZAPIImporter {
                     
                     // Title
                     title = (String)result.get("title");
-                    title.replaceAll("[|]", "-");
+                    if (title == null) continue;
+                    title = title.replaceAll("[|]", "-");
                     if (debug) System.out.println(" - " + title);
                     
                     // URLMain
@@ -188,7 +190,8 @@ public class DigitalNZAPIImporter {
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
                                                          urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
+                                                         urlPDF, urlIIIF, urlPlainText, 
+                                                         urlALTOXML, urlTEI, urlOther,
                                                          placeOfPublication, licence, idOther,
                                                          catLink, language));
                     if (debug) System.out.println();
