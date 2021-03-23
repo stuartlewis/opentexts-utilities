@@ -206,6 +206,15 @@ public class LeidenUniversityLibraryIIIFDiscovery {
                         } 
                     }
                     
+                    // Remove year from the published field if we can
+                    if (placeOfPublication.endsWith(", " + year)) {
+                        placeOfPublication = placeOfPublication.substring(0, placeOfPublication.length() - 6);
+                        if (debug) System.out.println(" - NEW placeOfPublication = " + placeOfPublication);
+                    } else if (placeOfPublication.endsWith(", " + year + ".")) {
+                        placeOfPublication = placeOfPublication.substring(0, placeOfPublication.length() - 7);
+                        if (debug) System.out.println(" - NEW placeOfPublication = " + placeOfPublication);
+                    }
+                    
                     if (description.endsWith("|")) description = description.substring(0, description.length() - 1);
                     
                     JSONArray sequences = (JSONArray)itemJson.get("sequences");
