@@ -58,7 +58,7 @@ public class NationalLibraryofScotlandIIIFDiscovery {
         // 1) Iterate through collections
         String top = "https://view.nls.uk/collections/top.json";
         String prefix = "c:/otw/manifests/nls/";
-        DownloadIIIFManifest.get(top, prefix, true);
+        DownloadIIIFManifest.get(top, prefix, true, 0);
         
         JSONParser discoveryParser = new JSONParser();
         JSONObject discoveryJson = (JSONObject)discoveryParser.parse(new FileReader(prefix + top.replaceAll("/", "_").replaceAll(":", "-")));
@@ -70,7 +70,7 @@ public class NationalLibraryofScotlandIIIFDiscovery {
             String collectionURL = (String)jsonCollection.get("@id");
             String collectionLabel = (String)jsonCollection.get("label");
             if (debug) System.out.println("Parsing collection: " + collectionURL + " (" + collectionLabel + ")");
-            DownloadIIIFManifest.get(collectionURL, prefix, true);
+            DownloadIIIFManifest.get(collectionURL, prefix, true, 0);
             
             JSONParser collectionsParser = new JSONParser();
             JSONObject collectionJson = (JSONObject)collectionsParser.parse(new FileReader(prefix + collectionURL.replaceAll("/", "_").replaceAll(":", "-")));
@@ -83,7 +83,7 @@ public class NationalLibraryofScotlandIIIFDiscovery {
                     String manifestURL = (String)jsonManifest.get("@id");
                     String manifestTitle = (String)jsonManifest.get("label");
                     if (debug) System.out.println("Parsing item: " + manifestURL + " (" + manifestTitle + ")");
-                    DownloadIIIFManifest.get(manifestURL, prefix, true);
+                    DownloadIIIFManifest.get(manifestURL, prefix, true, 0);
                     
                     JSONParser itemParser = new JSONParser();
                     JSONObject itemJson = (JSONObject)itemParser.parse(new FileReader(prefix + manifestURL.replaceAll("/", "_").replaceAll(":", "-")));

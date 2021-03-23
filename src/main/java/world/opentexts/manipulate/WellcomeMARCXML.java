@@ -271,7 +271,7 @@ public class WellcomeMARCXML {
                     // Download the manifest
                     licence = "";
                     String prefix = "c:/otw/manifests/wellcome/";
-                    DownloadIIIFManifest.get(urlIIIF, prefix, false);
+                    DownloadIIIFManifest.get(urlIIIF, prefix, false, 0);
                     try {
 			List<String> allLines = Files.readAllLines(Paths.get(prefix + urlIIIF.replaceAll("/", "_").replaceAll(":", "-")));
 			for (String line : allLines) {

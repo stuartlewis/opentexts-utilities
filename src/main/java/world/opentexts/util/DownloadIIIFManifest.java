@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Download (and cache) a IIIF manifest
@@ -20,7 +21,7 @@ import java.net.URL;
  */
 public class DownloadIIIFManifest {
     
-    public static void get(String url, String prefix, boolean complete) {
+    public static boolean get(String url, String prefix, boolean complete, int sleep) {
         String filename = url.replaceAll("/", "_").replaceAll(":", "-");
         //System.out.println(filename);
         File manifest = new File(prefix + filename);
@@ -28,8 +29,15 @@ public class DownloadIIIFManifest {
         // If it isn't in the cache...
         if (!manifest.exists()) {
             try {
-                BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
-                PrintWriter pw = new PrintWriter (new FileWriter(prefix + filename));
+                // Sleep for the number of seconds requested
+                try {
+                    if (sleep > 0) Thread.sleep(sleep * 1000);
+                } catch (InterruptedException ie) {
+                    // Meh?!
+                }
+                
+                BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream(), StandardCharsets.UTF_8));
+                PrintWriter pw = new PrintWriter (new FileWriter(prefix + filename, StandardCharsets.UTF_8));
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
                     pw.write(inputLine + "\n");
@@ -44,9 +52,12 @@ public class DownloadIIIFManifest {
             } catch (IOException e) {
                 System.err.println("Unable to download IIIF manifest: " + url);
                 e.printStackTrace();
+                return false;
             }
         } else {
+            return true;
             //System.out.println("CACHE HIT");
         }
+        return true;
     }
 }
