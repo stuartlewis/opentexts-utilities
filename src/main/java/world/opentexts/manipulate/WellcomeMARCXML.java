@@ -285,6 +285,9 @@ public class WellcomeMARCXML {
                                 licence = licence.substring(1, licence.length() - 2);
                                 //System.out.println("Licence: " + licence);
                                 break;
+                            } else if (line.startsWith("\"id\": \"https://wellcomecollection.org/works/")) {
+                                urlMain = line.split(" ")[1].trim();
+                                urlMain = urlMain.substring(1, urlMain.length() - 2);
                             }
 			}
                     } catch (IOException e) {
