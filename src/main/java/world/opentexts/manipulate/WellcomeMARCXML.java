@@ -64,6 +64,7 @@ public class WellcomeMARCXML {
                                                     "urlIIIF",
                                                     "urlPlainText",
                                                     "urlALTOXML",
+                                                    "urlTEI",
                                                     "urlOther",
                                                     "placeOfPublication",
                                                     "licence",
@@ -76,7 +77,7 @@ public class WellcomeMARCXML {
             int lineCounter = 1;
             String organisation = "", idLocal = "", title = "", urlMain = "", year = "", date = "",
                    publisher = "", creator = "", topic = "", description = "", urlPDF = "", 
-                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlOther = "", 
+                   urlIIIF = "", urlPlainText = "", urlALTOXML = "", urlTEI = "", urlOther = "", 
                    placeOfPublication = "", licence = "", idOther = "", catLink = "", language = "";
  
             CSVParser csvParser = new CSVParser(in, CSVFormat.DEFAULT
@@ -225,11 +226,14 @@ public class WellcomeMARCXML {
                         description = description.substring(1, description.length() - 1);
                     }
 
-                    urlPDF = "https://dlcs.io/pdf/wellcome/pdf-item/b" + idLocal + "/0";
-
-                    urlPlainText = "https://wellcomelibrary.org/service/fulltext/b" + idLocal + "/0?raw=true";
-
-                    urlIIIF = "https://wellcomelibrary.org/iiif/b" + idLocal + "/manifest";
+                    //urlPDF = "https://dlcs.io/pdf/wellcome/pdf-item/b" + idLocal + "/0";
+                    urlPDF = "https://iiif.wellcomecollection.org/pdf/b" + idLocal;
+                    
+                    //urlPlainText = "https://wellcomelibrary.org/service/fulltext/b" + idLocal + "/0?raw=true";
+                    urlPlainText = "https://api.wellcomecollection.org/text/v1/b" + idLocal;
+                    
+                    //urlIIIF = "https://wellcomelibrary.org/iiif/b" + idLocal + "/manifest";
+                    urlIIIF = "https://iiif.wellcomecollection.org/presentation/b" + idLocal;
 
                     placeOfPublication = record.get("260");    
                     if (!"".equals(placeOfPublication)) {
@@ -276,7 +280,7 @@ public class WellcomeMARCXML {
 			List<String> allLines = Files.readAllLines(Paths.get(prefix + urlIIIF.replaceAll("/", "_").replaceAll(":", "-")));
 			for (String line : allLines) {
                             line = line.trim();
-                            if (line.startsWith("\"license\"")) {
+                            if (line.startsWith("\"rights\"")) {
                                 licence = line.split(" ")[1].trim();
                                 licence = licence.substring(1, licence.length() - 2);
                                 //System.out.println("Licence: " + licence);
@@ -296,8 +300,8 @@ public class WellcomeMARCXML {
                     csvPrinter.printRecord(Arrays.asList(organisation, idLocal, title,
                                                          urlMain, year, date, publisher,
                                                          creator, topic, description,
-                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlOther,
-                                                         placeOfPublication, licence, idOther,
+                                                         urlPDF, urlIIIF, urlPlainText, urlALTOXML, urlTEI,
+                                                         urlOther, placeOfPublication, licence, idOther,
                                                          catLink, language));
                     
                     //System.out.println(lineCounter++);
